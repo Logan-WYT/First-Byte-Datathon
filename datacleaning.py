@@ -164,6 +164,7 @@ print(missing_cleaned)
 print(f"\n✓ Age group distribution:")
 print(df_cleaned['Customer_Age_Group'].value_counts())
 print(f"\n✓ Region distribution:")
+<<<<<<< HEAD
 print(df_cleaned['Customer_Region'].value_counts())
 
 # VISUALIZATIONS
@@ -251,3 +252,6 @@ print(attendance_by_age)
 print("\nSales by Age Group:")
 print(sales_by_age)
 print("\n✓ All visualizations created successfully!")
+=======
+print(df_cleaned['Customer_Region'].value_counts())
+>>>>>>> 105246a17afa136ec49a19a8b51cce6d728f794e
