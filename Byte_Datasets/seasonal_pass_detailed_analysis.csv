@@ -1,0 +1,5 @@
+,Purchase_Count,Purchase_Count,Purchase_Count,Purchase_Count,Purchase_Count,Total_Spent,Total_Spent,Total_Spent,Total_Spent,Avg_Purchase,Avg_Purchase,Games_Attended,Games_Attended
+,count,mean,std,min,max,mean,std,min,max,mean,std,mean,std
+Seasonal_Pass,,,,,,,,,,,,,
+False,41460,1.52,0.5,1,2,145.1,78.56,20,304,95.12,43.14,4.48,2.29
+True,3058,1.52,0.5,1,2,144.36,78.28,20,304,94.77,42.9,22.49,4.56

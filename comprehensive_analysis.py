@@ -75,7 +75,7 @@ def clean_merchandise_sales(df):
     # Customer_Region: title-case
     df['Customer_Region'] = df['Customer_Region'].str.title()
     
-    # Customer_Age_Group: uppercase, remove inner spaces
+    # Customer_Age_Group: uppercase, remove inner spaces, Age Group Inconsistencies solved
     df['Customer_Age_Group'] = df['Customer_Age_Group'].str.upper().str.replace(' ', '')
     
     # Dates: parse to datetime
@@ -103,7 +103,7 @@ def clean_fanbase_engagement(df):
     # Age_Group: uppercase, remove inner spaces
     df['Age_Group'] = df['Age_Group'].str.upper().str.replace(' ', '')
     
-    # Customer_Region: title-case
+    # Customer_Region: title-case Region Inconsistences solved
     df['Customer_Region'] = df['Customer_Region'].str.title()
     
     # Seasonal_Pass: map to boolean-like string
