@@ -164,7 +164,6 @@ print(missing_cleaned)
 print(f"\n✓ Age group distribution:")
 print(df_cleaned['Customer_Age_Group'].value_counts())
 print(f"\n✓ Region distribution:")
-<<<<<<< HEAD
 print(df_cleaned['Customer_Region'].value_counts())
 
 # VISUALIZATIONS
@@ -251,7 +250,200 @@ print("\nAttendance by Age Group:")
 print(attendance_by_age)
 print("\nSales by Age Group:")
 print(sales_by_age)
+
+# ADDITIONAL VISUALIZATIONS - STADIUM OPERATIONS & DELIVERY TIMES
+print("\n" + "=" * 80)
+print("CREATING ADDITIONAL VISUALIZATIONS:")
+print("=" * 80)
+
+# 1. Revenue by Source over Time (Line Chart)
+fig, ax = plt.subplots(figsize=(14, 7))
+
+# Pivot data to have months as rows and sources as columns
+revenue_by_source = df_stadium_operations.pivot(index='Month', columns='Source', values='Revenue')
+
+# Plot each source as a separate line
+for source in revenue_by_source.columns:
+    ax.plot(revenue_by_source.index, revenue_by_source[source], marker='o', linewidth=2, label=source)
+
+ax.set_title('Revenue by Source Over Time', fontsize=16, fontweight='bold')
+ax.set_xlabel('Month', fontsize=12)
+ax.set_ylabel('Revenue ($)', fontsize=12)
+ax.legend(title='Source', fontsize=10, loc='best')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig('/Users/lelandgraves/Desktop/BOLT Datathon/revenue_by_source_over_time.png', dpi=300, bbox_inches='tight')
+print("✓ Saved: revenue_by_source_over_time.png")
+plt.close()
+
+# 2. Total Profit by Month (Line Chart)
+fig, ax = plt.subplots(figsize=(14, 7))
+
+# Calculate total profit (sum of all revenues, negatives are costs) per month
+monthly_profit = df_stadium_operations.groupby('Month')['Revenue'].sum()
+
+ax.plot(monthly_profit.index, monthly_profit.values, marker='o', linewidth=3, color='#2ca02c', markersize=8)
+ax.fill_between(monthly_profit.index, 0, monthly_profit.values, alpha=0.3, color='#2ca02c')
+
+# Add value labels
+for x, y in zip(monthly_profit.index, monthly_profit.values):
+    ax.text(x, y, f'${y:,.0f}', ha='center', va='bottom', fontsize=9, fontweight='bold')
+
+ax.set_title('Total Monthly Profit (Revenue - Costs)', fontsize=16, fontweight='bold')
+ax.set_xlabel('Month', fontsize=12)
+ax.set_ylabel('Profit ($)', fontsize=12)
+ax.grid(True, alpha=0.3)
+ax.axhline(y=0, color='red', linestyle='--', linewidth=1, alpha=0.5)
+plt.tight_layout()
+plt.savefig('/Users/lelandgraves/Desktop/BOLT Datathon/monthly_profit.png', dpi=300, bbox_inches='tight')
+print("✓ Saved: monthly_profit.png")
+plt.close()
+
+# 3. Delivery Time: Domestic vs International (Bar Chart)
+fig, ax = plt.subplots(figsize=(12, 7))
+
+# Calculate delivery time (only for records with both dates)
+df_delivery = df_cleaned[df_cleaned['Arrival_Date'].notna()].copy()
+df_delivery['Delivery_Time'] = (pd.to_datetime(df_delivery['Arrival_Date']) - pd.to_datetime(df_delivery['Selling_Date'])).dt.days
+
+# Calculate average delivery time by region
+avg_delivery = df_delivery.groupby('Customer_Region')['Delivery_Time'].agg(['mean', 'median', 'count'])
+avg_delivery = avg_delivery.sort_values('mean', ascending=False)
+
+# Create bar chart
+bars = ax.bar(avg_delivery.index, avg_delivery['mean'], color=['#1f77b4', '#ff7f0e'], edgecolor='black', linewidth=1.5)
+
+# Add value labels
+for i, (idx, row) in enumerate(avg_delivery.iterrows()):
+    ax.text(i, row['mean'], f"{row['mean']:.1f} days\n(n={int(row['count'])})", 
+            ha='center', va='bottom', fontsize=11, fontweight='bold')
+
+ax.set_title('Average Delivery Time: Domestic vs International', fontsize=16, fontweight='bold')
+ax.set_xlabel('Region', fontsize=12)
+ax.set_ylabel('Average Delivery Time (Days)', fontsize=12)
+ax.grid(axis='y', alpha=0.3)
+plt.tight_layout()
+plt.savefig('/Users/lelandgraves/Desktop/BOLT Datathon/delivery_time_comparison.png', dpi=300, bbox_inches='tight')
+print("✓ Saved: delivery_time_comparison.png")
+plt.close()
+
+print("\n" + "=" * 80)
+print("DELIVERY TIME STATISTICS:")
+print("=" * 80)
+print(avg_delivery)
+
+# CUSTOMER TOTAL SPENDING BY DELIVERY TIME
+print("\n" + "=" * 80)
+print("CUSTOMER TOTAL SPENDING ANALYSIS BY DELIVERY TIME:")
+print("=" * 80)
+
+# Calculate delivery time for each customer (average if they have multiple orders)
+customer_delivery = df_delivery.groupby('Member_ID').agg({
+    'Delivery_Time': 'mean',  # Average delivery time for customers with multiple orders
+    'Unit_Price': 'sum'  # Total spending over the season
+}).reset_index()
+customer_delivery.columns = ['Member_ID', 'Avg_Delivery_Time', 'Total_Season_Spending']
+
+# Round delivery time to nearest day for categorization
+customer_delivery['Delivery_Time_Category'] = customer_delivery['Avg_Delivery_Time'].round().astype(int)
+
+# Calculate average total spending per customer for each delivery time category
+spending_by_delivery_cat = customer_delivery.groupby('Delivery_Time_Category').agg({
+    'Total_Season_Spending': ['mean', 'median', 'sum', 'count']
+}).reset_index()
+spending_by_delivery_cat.columns = ['Delivery_Days', 'Avg_Total_Spending', 'Median_Spending', 'Total_Revenue', 'Customer_Count']
+
+# Filter to show reasonable delivery times (1-15 days for clarity)
+spending_by_delivery_cat = spending_by_delivery_cat[spending_by_delivery_cat['Delivery_Days'] <= 15]
+
+print("\nSpending Statistics by Delivery Time:")
+print(spending_by_delivery_cat)
+
+# PRODUCT DELIVERY TIME ANALYSIS
+print("\n" + "=" * 80)
+print("AVERAGE DELIVERY TIME BY PRODUCT:")
+print("=" * 80)
+
+# Calculate average delivery time for each product
+product_delivery = df_delivery.groupby('Item_Name').agg({
+    'Delivery_Time': ['mean', 'median', 'count']
+}).reset_index()
+product_delivery.columns = ['Product', 'Avg_Delivery_Time', 'Median_Delivery_Time', 'Order_Count']
+
+# Sort by average delivery time
+product_delivery = product_delivery.sort_values('Avg_Delivery_Time', ascending=False)
+
+print("\nProduct Delivery Statistics:")
+print(product_delivery)
+
+# Create bar chart for products
+fig, ax = plt.subplots(figsize=(14, 10))
+
+# Create horizontal bar chart for better readability
+bars = ax.barh(product_delivery['Product'], product_delivery['Avg_Delivery_Time'], 
+               edgecolor='black', linewidth=1.2)
+
+# Color bars based on delivery time (fast vs slow)
+colors = ['#2ca02c' if x <= 7 else '#e74c3c' for x in product_delivery['Avg_Delivery_Time']]
+for bar, color in zip(bars, colors):
+    bar.set_color(color)
+
+# Add value labels
+for i, (idx, row) in enumerate(product_delivery.iterrows()):
+    ax.text(row['Avg_Delivery_Time'], i, 
+            f" {row['Avg_Delivery_Time']:.1f} days (n={int(row['Order_Count'])})", 
+            va='center', fontsize=9, fontweight='bold')
+
+# Add vertical line at 7 days to mark the fast/slow threshold
+ax.axvline(x=7, color='black', linestyle='--', linewidth=2, alpha=0.5, label='7-day threshold')
+
+ax.set_title('Average Delivery Time by Product', fontsize=16, fontweight='bold')
+ax.set_xlabel('Average Delivery Time (Days)', fontsize=12)
+ax.set_ylabel('Product Name', fontsize=12)
+ax.grid(axis='x', alpha=0.3)
+ax.legend()
+
+plt.tight_layout()
+plt.savefig('/Users/lelandgraves/Desktop/BOLT Datathon/delivery_time_by_product.png', dpi=300, bbox_inches='tight')
+print("✓ Saved: delivery_time_by_product.png")
+plt.close()
+
+# Create distribution chart
+fig, ax = plt.subplots(figsize=(14, 7))
+
+# Create bar chart
+bars = ax.bar(spending_by_delivery_cat['Delivery_Days'], spending_by_delivery_cat['Avg_Total_Spending'], 
+              color='#3498db', edgecolor='black', linewidth=1.2, alpha=0.8)
+
+# Color bars differently for fast (<=7) vs slow (>7) delivery
+for i, row in spending_by_delivery_cat.iterrows():
+    if row['Delivery_Days'] <= 7:
+        bars[i].set_color('#2ca02c')  # Green for fast delivery
+    else:
+        bars[i].set_color('#e74c3c')  # Red for slow delivery
+
+# Add value labels on top of bars
+for i, row in spending_by_delivery_cat.iterrows():
+    if row['Customer_Count'] >= 100:  # Only show labels for significant sample sizes
+        ax.text(row['Delivery_Days'], row['Avg_Total_Spending'], 
+                f"${row['Avg_Total_Spending']:.0f}\n(n={int(row['Customer_Count'])})", 
+                ha='center', va='bottom', fontsize=9, fontweight='bold')
+
+# Add vertical line at 7 days to mark the fast/slow threshold
+ax.axvline(x=7.5, color='black', linestyle='--', linewidth=2, alpha=0.5, label='7-day threshold')
+
+ax.set_title('Average Total Season Spending per Customer by Delivery Time', fontsize=16, fontweight='bold')
+ax.set_xlabel('Delivery Time (Days)', fontsize=12)
+ax.set_ylabel('Average Total Spending per Customer Over Season ($)', fontsize=12)
+ax.grid(axis='y', alpha=0.3)
+ax.legend()
+
+# Set x-axis to show all integer days
+ax.set_xticks(range(1, 16))
+
+plt.tight_layout()
+plt.savefig('/Users/lelandgraves/Desktop/BOLT Datathon/total_spending_by_delivery_time.png', dpi=300, bbox_inches='tight')
+print("✓ Saved: total_spending_by_delivery_time.png")
+plt.close()
+
 print("\n✓ All visualizations created successfully!")
-=======
-print(df_cleaned['Customer_Region'].value_counts())
->>>>>>> 105246a17afa136ec49a19a8b51cce6d728f794e
