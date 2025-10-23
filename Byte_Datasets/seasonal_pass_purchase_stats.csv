@@ -1,0 +1,5 @@
+,Unit_Price,Unit_Price,Unit_Price,Unit_Price,Member_ID,Games_Attended
+,count,sum,mean,std,nunique,mean
+Seasonal_Pass,,,,,,
+False,63219,6015692,95.16,49.91,41460,4.49
+True,4658,441439,94.77,49.63,3058,22.51

@@ -1,0 +1,19 @@
+,,Unit_Price,Unit_Price,Unit_Price
+,,count,sum,mean
+Seasonal_Pass,Item_Category,,,
+False,Cap,4599,160965,35.0
+False,Hoodie,12956,971700,75.0
+False,Jersey,25191,3829032,152.0
+False,Mug,3579,89475,25.0
+False,Poster,3044,60880,20.0
+False,Scarf,3530,141200,40.0
+False,Youth Hoodie,4159,207950,50.0
+False,Youth Jersey,6161,554490,90.0
+True,Cap,367,12845,35.0
+True,Hoodie,975,73125,75.0
+True,Jersey,1822,276944,152.0
+True,Mug,243,6075,25.0
+True,Poster,234,4680,20.0
+True,Scarf,240,9600,40.0
+True,Youth Hoodie,294,14700,50.0
+True,Youth Jersey,483,43470,90.0
